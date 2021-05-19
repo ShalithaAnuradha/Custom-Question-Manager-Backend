@@ -33,6 +33,9 @@ setTimeout(function () {
 function pagination(count, page, questions) {
     return questions.slice(page, page + count);
 }
+function validateQuestion(id, question, category, state, questionGroup, license, status, display) {
+    return true;
+}
 exports.router.get('/api/v1/questions/search', (function (req, res) {
     pool.getConnection(function (err, connection) {
         if (err) {
@@ -91,19 +94,23 @@ exports.router.get('/api/v1/questions', (function (req, res) {
     });
 }));
 exports.router.post('/api/v1/questions', function (req, res) {
+    var id = req.body.id;
+    var question = req.body.question;
+    var category = req.body.category;
+    var state = req.body.state;
+    var questionGroup = req.body.questionGroup;
+    var license = req.body.license;
+    var status = req.body.status;
+    var display = req.body.display;
+    if (!validateQuestion(id, question, category, state, questionGroup, license, status, display)) {
+        res.status(400).json(false);
+        return;
+    }
     pool.getConnection(function (err, connection) {
         if (err) {
             console.log("Failed to establish the database connection");
             throw err;
         }
-        var id = req.body.id;
-        var question = req.body.question;
-        var category = req.body.category;
-        var state = req.body.state;
-        var questionGroup = req.body.questionGroup;
-        var license = req.body.license;
-        var status = req.body.status;
-        var display = req.body.display;
         connection.beginTransaction(function (err) {
             if (err) {
                 throw err;
@@ -118,13 +125,14 @@ exports.router.post('/api/v1/questions', function (req, res) {
                 }
                 else {
                     if (result.affectedRows > 0) {
-                        res.status(201).json(true);
                         connection.commit(function (err) {
                             if (err) {
                                 connection.rollback(function () {
+                                    res.status(500).json(false);
                                     throw err;
                                 });
                             }
+                            res.status(201).json(true);
                             // console.log('Transaction Complete.');
                         });
                     }
