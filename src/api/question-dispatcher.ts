@@ -37,6 +37,15 @@ function pagination(count:number,page:number,questions): Array<Question>{
     return questions.slice(page, page+count);
 }
 
+// Unit test example for pagination
+const paginationTest = {
+    pagination: (count:number, page:number, questions):  Array<Question> => {
+        return questions.slice(page, page + count);
+    }
+};
+// When testing enable the below comment to export the paginationTest object
+// module.exports = paginationTest;
+
 function validateQuestion(id, question, category, state, questionGroup, license, status, display): boolean{
     return true;
 }

@@ -33,6 +33,14 @@ setTimeout(function () {
 function pagination(count, page, questions) {
     return questions.slice(page, page + count);
 }
+// Unit test example for pagination
+var paginationTest = {
+    pagination: function (count, page, questions) {
+        return questions.slice(page, page + count);
+    }
+};
+// When testing enable the below comment to export the paginationTest object
+// module.exports = paginationTest;
 function validateQuestion(id, question, category, state, questionGroup, license, status, display) {
     return true;
 }
