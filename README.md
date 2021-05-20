@@ -50,5 +50,5 @@ Now you have sucessfully installed the Node and NPM. Now go to the next stage of
 	
 3. Now You have started the Server(Don't close that terminal)
 	
-5. Now using the postman application or a suitable client(browser) you can receive the data from the server.
+4. Now using the postman application or a suitable client(browser) you can receive the data from the server.
 (You have to create a data base named question, (if it is not existed) for a real project).
