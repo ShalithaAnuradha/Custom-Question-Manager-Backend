@@ -5,10 +5,12 @@
 import express = require("express");
 import mysql = require("mysql");
 import {Question} from "../model/question";
+import {PoolConnection} from "mysql";
 
 
 export const router = express.Router();
 
+// Use connection pool to enhance the performance of the database.
 var pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
@@ -46,8 +48,35 @@ const paginationTest = {
 // When testing enable the below comment to export the paginationTest object
 // module.exports = paginationTest;
 
-function validateQuestion(id, question, category, state, questionGroup, license, status, display): boolean{
-    return true;
+//Validation as a separate method
+async function validateQuestion(id, question, category, state, questionGroup, license, status, display, connection: PoolConnection): Promise<boolean>{
+    if(id==undefined || question==undefined || category == undefined || state == undefined || questionGroup == undefined
+    || license == undefined || status == undefined || display ==undefined){
+        return false;
+    }
+
+    if(status.toString =='Inactive' || status.toString() == 'Active'){
+        console.log(status);
+        return false;
+    }
+
+    connection.query('SELECT id FROM question', (err, result) => {
+        if (err) {
+            console.log("Failed to read the customers", err);
+        } else {
+            let idArray = JSON.parse(JSON.stringify(result));
+            for (let i = 0; i < idArray.length; i++) {
+                console.log(idArray[i].id,id)
+                if(idArray[i].id == id){
+                    console.log("hiiii");
+                    return false;
+                }
+            }
+            console.log("babe");
+            return true;
+        }
+    });
+
 }
 
 router.get('/api/v1/questions/search', ((req, res) => {
@@ -128,20 +157,51 @@ router.post('/api/v1/questions', (req, res) => {
     let license = req.body.license;
     let status = req.body.status;
     let display = req.body.display;
+    let validated = true;
 
-    if(!validateQuestion(id, question, category, state, questionGroup, license, status, display)){
-        res.status(400).json(false);
-        return;
-    }
 
-    pool.getConnection(function (err, connection) {
+    pool.getConnection(async function (err, connection) {
 
         if (err) {
             console.log("Failed to establish the database connection");
-            throw err;
+            // throw err;
         }
 
+        // Check whether fields are not assigned
+        if(id==undefined || question==undefined || category == undefined || state == undefined || questionGroup == undefined
+            || license == undefined || status == undefined || display ==undefined){
+            validated = false;
+
+        }
+
+        // Limit status to the declared values (This can be done with enum too)
+        if(status.toString =='Inactive' || status.toString() == 'Active'){
+            console.log(status);
+            validated = false;
+        }
+
+        // Check whether the given id is in the system. If it exists not allowed to enter.
+        connection.query('SELECT id FROM question', (err, result) => {
+            if (err) {
+                console.log("Failed to read the customers", err);
+            } else {
+                let idArray = JSON.parse(JSON.stringify(result));
+                for (let i = 0; i < idArray.length; i++) {
+                    if(idArray[i].id == id){
+                        validated = false;
+                        break;
+                    }
+                }
+            }
+        });
+
+        // Start the transaction scope to insert the data into the database
         connection.beginTransaction(function(err) {
+
+            if(!validated){
+                res.status(400).json(false);
+                return;
+            }
             if (err) {throw err;}
             connection.query('INSERT INTO question VALUES (?,?,?,?,?,?,?,?)',
                 [id, question, category, state, questionGroup, license, status, display], (err, result) => {
