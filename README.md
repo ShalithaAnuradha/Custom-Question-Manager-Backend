@@ -40,9 +40,7 @@ Now Open the terminal again(at any where by pressing "Ctrl + Alt + T" and type b
 Now you have sucessfully installed the Node and NPM. Now go to the next stage of  "Configurations to Run the Application".
 (You can install latest npm and node too if you prefer)
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------
--------------------------------------Configurations to Run the Application-----------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##Configurations to Run the Application
 1. Create a folder named practial_assignment
 2. Open that folder
 2. Right click on the folder and open the terminal. Then type below codes and execute them by pressing Enter.
